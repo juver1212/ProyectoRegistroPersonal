@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/idLinearItem"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:paddingLeft="15dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
+    android:layout_height="80dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/profile_image"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/foto"
+        app:civ_border_width="2dp"
+        android:layout_marginTop="5dp"
+        app:civ_border_color="#FFFFFF"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="10dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/txtNombre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#333"
+            android:layout_gravity="center_vertical"
+            android:textSize="18dp"
+            android:paddingTop="10dp"
+            android:text="TextView" />
+
+
+            <TextView
+                android:id="@+id/txtDocumento"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#333"
+                android:paddingBottom="12dp"
+                android:layout_gravity="center_vertical"
+                android:text="77822284" />
+
+    </LinearLayout>
+</LinearLayout>

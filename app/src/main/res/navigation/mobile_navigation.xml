@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_lista_trabajador">
+
+    <fragment
+        android:id="@+id/nav_lista_trabajador"
+        android:name="com.example.proyectoregistropersonal.fragment.listaFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_lista" />
+
+    <fragment
+        android:id="@+id/nav_registro_marcacion"
+        android:name="com.example.proyectoregistropersonal.fragment.listaMarcacionFragment"
+        android:label="@string/menu_gallery"
+        tools:layout="@layout/fragment_lista_marcacion" />
+
+    <fragment
+        android:id="@+id/nav_consulta_marcacion"
+        android:name="com.example.proyectoregistropersonal.fragment.listaConsultarMarcacionFragment"
+        android:label="@string/menu_slideshow"
+        tools:layout="@layout/fragment_consultar_marcacion" />
+
+    <fragment
+        android:id="@+id/nav_sincronizar_marcacion"
+        android:name="com.example.proyectoregistropersonal.sincronizarFragment"
+        android:label="Sincronizar marcación"
+        tools:layout="@layout/fragment_sincronizar" />
+
+    <fragment
+        android:id="@+id/nav_optimizar_espacio"
+        android:name="com.example.proyectoregistropersonal.fragment.optimizacionFragment"
+        android:label="Optimizar espacio"
+        tools:layout="@layout/fragment_optimizacion" />
+</navigation>

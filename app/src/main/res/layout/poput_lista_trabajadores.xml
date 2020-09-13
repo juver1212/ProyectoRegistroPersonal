@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingRight="7dp"
+    android:paddingLeft="7dp"
+    android:gravity="center_vertical"
+    android:background="#80121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:background="@drawable/borde_redondo">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_marginTop="25dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="24dp"
+            android:text="Seleccione operación a realizar:" />
+
+        <TextView
+            android:id="@+id/txtNombre"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            android:text="MIGUEL ANGEL GUEVARA MARQUEZ" />
+
+        <Button
+            android:id="@+id/btnModificarTrabajdor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MODIFICAR"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/borde_redondo_color"
+            android:theme="@style/RaisedButtonDark" />
+
+        <Button
+            android:id="@+id/btnEliminarTrabajdor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ELIMINAR"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/borde_redondo_color"
+            android:backgroundTint="@color/red_btn_bg_color"
+            android:theme="@style/RaisedButtonDark" />
+    </LinearLayout>
+</LinearLayout>

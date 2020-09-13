@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">ProyectoRegistroPersonal</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">M&amp;P Solutions</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Lista de trabajadores</string>
+    <string name="menu_gallery">Registrar marcación</string>
+    <string name="menu_slideshow">Consultar marcación</string>
+    <string name="menu_sincronizar_marcacion">Sincronizar marcación</string>
+    <string name="menu_optimizar_espacio">Optimizar espacio</string>
+
+    <string name="home_second">Home Second</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

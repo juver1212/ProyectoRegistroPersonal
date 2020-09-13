@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_lista_trabajador"
+            android:icon="@drawable/listado"
+            android:title="@string/menu_home" />
+        <item
+            android:id="@+id/nav_registro_marcacion"
+            android:icon="@drawable/registrar"
+            android:title="@string/menu_gallery" />
+        <item
+            android:id="@+id/nav_consulta_marcacion"
+            android:icon="@drawable/buscar"
+            android:title="@string/menu_slideshow" />
+
+        <item
+            android:id="@+id/nav_sincronizar_marcacion"
+            android:icon="@drawable/sincronizar"
+            android:title="@string/menu_sincronizar_marcacion" />
+
+        <item
+            android:id="@+id/nav_optimizar_espacio"
+            android:icon="@drawable/liberar"
+            android:title="@string/menu_optimizar_espacio" />
+    </group>
+
+    <item android:title="Logout">
+        <menu>
+            <item
+                android:id="@+id/nav_cerrar_sesion"
+                android:icon="@drawable/cerrar"
+                android:title="Cerrar sesion" />
+        </menu>
+    </item>
+</menu>
