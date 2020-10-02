@@ -37,6 +37,8 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -222,9 +224,13 @@ public class httpConection {
                 while (!cursor.isAfterLast()) {
                     objetoJson = new JSONObject();
                     try {
+                        String dia = cursor.getString(cursor.getColumnIndex("Fecha")).substring(0,2);
+                        String mes = cursor.getString(cursor.getColumnIndex("Fecha")).substring(3,5);
+                        String anio = cursor.getString(cursor.getColumnIndex("Fecha")).substring(6,10);
+
                         objetoJson.put("CodEmpresa", cursor.getString(cursor.getColumnIndex("CodEmpresa")));
                         objetoJson.put("Documento", cursor.getString(cursor.getColumnIndex("Documento")));
-                        objetoJson.put("Fecha", cursor.getString(cursor.getColumnIndex("Fecha")));
+                        objetoJson.put("Fecha", anio+"-"+mes+"-"+dia);
                         objetoJson.put("Hora", cursor.getString(cursor.getColumnIndex("Hora")));
                         objetoJson.put("Latitud", cursor.getString(cursor.getColumnIndex("Latitud")));
                         objetoJson.put("Longitud", cursor.getString(cursor.getColumnIndex("Longitud")));
@@ -307,36 +313,284 @@ public class httpConection {
         @Override
         protected void onPostExecute(String result) {
             pDialog.dismiss();
-            //if (result.equals("\"status\":1")) {
-                if (cursor != null && cursor.getCount() > 0) {
-                    cursor.moveToFirst();
-                    while (!cursor.isAfterLast()) {
-                        int id = cursor.getInt(cursor.getColumnIndex("_id"));
-                        dbManager.cctualizarMarcacion(id);
-                        cursor.moveToNext();
+            Log.e("RESPUESTAAAA", result);
+            JSONObject objetoJson;
+
+            try {
+                objetoJson = new JSONObject(result);
+                String respuesta = objetoJson.getString("status");
+                if (respuesta.equals("0")) {
+                    if (cursor != null && cursor.getCount() > 0) {
+                        /* cursor.moveToFirst();
+                        while (!cursor.isAfterLast()) {
+                            int id = cursor.getInt(cursor.getColumnIndex("_id"));
+                            dbManager.cctualizarMarcacion(id);
+                            cursor.moveToNext();
+                        }
+
+                        Date c = Calendar.getInstance().getTime();
+                        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                        String fechaActual = df.format(c);
+
+                        Date dt = new Date();
+                        int hours = dt.getHours();
+                        int minutes = dt.getMinutes();
+                        int seconds = dt.getSeconds();
+                        String horaActual = hours + ":" + minutes + ":" + seconds;
+
+                        ContentValues cv = new ContentValues();
+                        cv.put("Fecha", fechaActual);
+                        cv.put("Hora", horaActual);
+                        dbManager.insertRegistroSincronizacion(cv);*/
+                        Log.e("LLEGOO CORRECTO","TODO CORRECTO POR AQUI");
+                        new SincronizarTrabajadores(contextRef.get(), cursor).execute();
+                        //new SweetAlertDialog(contextRef.get(), SweetAlertDialog.SUCCESS_TYPE).setTitleText("Excelente!").setContentText("Datos sincronizados").show();
                     }
-
-                    Date c = Calendar.getInstance().getTime();
-                    SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-                    String fechaActual = df.format(c);
-
-                    Date dt = new Date();
-                    int hours = dt.getHours();
-                    int minutes = dt.getMinutes();
-                    int seconds = dt.getSeconds();
-                    String horaActual = hours + ":" + minutes + ":" + seconds;
-
-                    ContentValues cv = new ContentValues();
-                    cv.put("Fecha", fechaActual);
-                    cv.put("Hora", horaActual);
-                    dbManager.insertRegistroSincronizacion(cv);
-                    new SweetAlertDialog(contextRef.get(), SweetAlertDialog.SUCCESS_TYPE).setTitleText("Excelente!").setContentText("Datos sincronizados").show();
                 } else {
-                    new SweetAlertDialog(contextRef.get(), SweetAlertDialog.ERROR_TYPE).setTitleText("Opss!").setContentText("Ocurrio un problema al sincronizar los datos").show();
+                    new SweetAlertDialog(contextRef.get(), SweetAlertDialog.ERROR_TYPE).setTitleText("Opss!").setContentText("Ocurrio un problema al sincronizar las marcaciones").show();
                     Vibrator v = (Vibrator) contextRef.get().getSystemService(Context.VIBRATOR_SERVICE);
                     v.vibrate(600);
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
-    //}
+    }
+
+    public static class SincronizarTrabajadores extends AsyncTask<String, String, String> {
+        private WeakReference<Context> contextRef;
+        private WeakReference<Cursor> cursorMarcaciones;
+
+        SweetAlertDialog pDialog;
+        HttpURLConnection conn;
+        URL url_new = null;
+        Cursor cursor;
+        Cursor cursorMarcacion;
+        DBManager dbManager;
+
+        public SincronizarTrabajadores(Context context, Cursor _cursorMarcaciones) {
+            contextRef = new WeakReference<>(context);
+            cursorMarcaciones = new WeakReference<>(_cursorMarcaciones);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.e("LLEGO TRABAJADOR","LLEGOOOO");
+            pDialog = new SweetAlertDialog(contextRef.get(), SweetAlertDialog.PROGRESS_TYPE);
+            pDialog.getProgressHelper().setBarColor(Color.parseColor("#05647F"));
+            pDialog.setTitleText("Sincronizando trabajadores...");
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            Log.e("LLEGO TRABAJADOR 2","LLEGOOOO");
+            cursorMarcacion = cursorMarcaciones.get();
+            dbManager = new DBManager(contextRef.get());
+            dbManager.open();
+            cursor = dbManager.ListarTrabajadores();
+            JSONArray listaJson = new JSONArray();
+            JSONObject objetoJson;
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    objetoJson = new JSONObject();
+                    try {
+
+                        String dia_Ing = "01";
+                        String mes_Ing = "01";
+                        String anio_Ing = "1999";
+                        String fechaI = cursor.getString(cursor.getColumnIndex("FechaIngreso"));
+                        Log.e("LLEGO TRABAJADOR 2.5","LLEGOOOO");
+                        if(!fechaI.equals("") && fechaI.length() > 7) {
+                            Log.e("LLEGO TRABAJADOR 2.5","LLEGOOOO");
+                            Log.e("ES FECHA",fechaI);
+                            dia_Ing = cursor.getString(cursor.getColumnIndex("FechaIngreso")).substring(0,2);
+                            mes_Ing = cursor.getString(cursor.getColumnIndex("FechaIngreso")).substring(3,5);
+                            if(fechaI.length() == 8) {
+                                anio_Ing = "20"+cursor.getString(cursor.getColumnIndex("FechaIngreso")).substring(6,8);
+                            }else{
+                                anio_Ing = cursor.getString(cursor.getColumnIndex("FechaIngreso")).substring(6,10);
+                            }
+                        }
+                        Log.e("LLEGO TRABAJADOR 3","LLEGOOOO");
+                        String dia_Ces = "01";
+                        String mes_Ces = "01";
+                        String anio_Ces = "1999";
+                        String fechaC = cursor.getString(cursor.getColumnIndex("FechaCese"));
+
+                        if(!fechaC.equals("") && fechaC.length() > 7) {
+                            Log.e("LLEGO TRABAJADOR 3.5","LLEGOOOO");
+                            Log.e("ES FECHA OTRO",fechaC);
+                             dia_Ces = cursor.getString(cursor.getColumnIndex("FechaCese")).substring(0, 2);
+                             mes_Ces = cursor.getString(cursor.getColumnIndex("FechaCese")).substring(3, 5);
+                            if(fechaC.length() == 8) {
+                                anio_Ing = "20"+cursor.getString(cursor.getColumnIndex("FechaCese")).substring(6, 8);
+                            }else{
+                                anio_Ing = cursor.getString(cursor.getColumnIndex("FechaCese")).substring(6, 10);
+                            }
+                        }
+                        Log.e("LLEGO TRABAJADOR 4","LLEGOOOO");
+                        //objetoJson.put("CodEmpresa", cursor.getString(cursor.getColumnIndex("_id")));
+                        //objetoJson.put("CodEmpresa", cursor.getString(cursor.getColumnIndex("CodEmpresa")));
+
+                        if(String.valueOf(cursor.getString(cursor.getColumnIndex("CodEmpresa"))).equals("") ||
+                                String.valueOf(cursor.getString(cursor.getColumnIndex("CodEmpresa"))).equals("null")){
+                            objetoJson.put("CodEmpresa", "01");
+                        }
+                        else{
+                            objetoJson.put("CodEmpresa", cursor.getString(cursor.getColumnIndex("CodEmpresa")));
+                        }
+
+                        objetoJson.put("Documento", cursor.getString(cursor.getColumnIndex("Documento")));
+                        objetoJson.put("Nombres", cursor.getString(cursor.getColumnIndex("Nombres")));
+                        objetoJson.put("Cargo", cursor.getString(cursor.getColumnIndex("Cargo")));
+                        objetoJson.put("Sueldo", cursor.getString(cursor.getColumnIndex("Sueldo")));
+                        objetoJson.put("AsigFam", cursor.getString(cursor.getColumnIndex("AsigFam")));
+                        objetoJson.put("EntidadFinanciera", cursor.getString(cursor.getColumnIndex("EntidadFinanciera")));
+                        objetoJson.put("CCI", cursor.getString(cursor.getColumnIndex("CCI")));
+                        objetoJson.put("NroCuenta", cursor.getString(cursor.getColumnIndex("NroCuenta")));
+                        objetoJson.put("Categoria", cursor.getString(cursor.getColumnIndex("Categoria")));
+                        objetoJson.put("CentroCosto", cursor.getString(cursor.getColumnIndex("CentroCosto")));
+                        objetoJson.put("FechaIngreso", anio_Ing+"-"+mes_Ing+"-"+dia_Ing);
+                        objetoJson.put("FechaCese", anio_Ces+"-"+mes_Ces+"-"+dia_Ces);
+                        String imagen = "";
+                        byte[] blob = cursor.getBlob(cursor.getColumnIndex("Foto"));
+                        try {
+                            if(blob != null) {
+                                Log.e("BLOG",blob.toString());
+                                imagen = new String(blob, "UTF-8");
+                            }else{
+                                imagen = "";
+                            }
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                        objetoJson.put("Foto", imagen);
+
+                        if(String.valueOf(cursor.getString(cursor.getColumnIndex("UsuReg"))).equals("") ||
+                                String.valueOf(cursor.getString(cursor.getColumnIndex("CodEmpresa"))).equals("null")){
+                            objetoJson.put("UsuReg", "admin");
+                        }
+                        else{
+                            objetoJson.put("UsuReg", cursor.getString(cursor.getColumnIndex("UsuReg")));
+                        }
+
+                        listaJson.put(objetoJson);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    cursor.moveToNext();
+                }
+            }
+
+            try {
+                Utils.ConexionSSL();
+                url_new = new URL("https://www.innovationtechnologyperu.com/asistencia/index.php/sincroniza/SyncTrabajador");
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return "exception";
+            }
+            try {
+                conn = (HttpURLConnection) url_new.openConnection();
+                conn.setReadTimeout(180000);
+                conn.setConnectTimeout(180000);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                // Append parameters to URL
+                Uri.Builder builder = new Uri.Builder()
+                        .appendQueryParameter("vp_clave", "hola")
+                        .appendQueryParameter("vp_lst", listaJson.toString());
+                String query = builder.build().getEncodedQuery();
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+                conn.connect();
+
+                int response_code = conn.getResponseCode();
+                String reponse = conn.getResponseMessage();
+
+                Log.e("respuesta codigo trabajador", String.valueOf(response_code));
+                Log.e("respuesta trabajador", reponse);
+
+                if (response_code == HttpURLConnection.HTTP_OK) {
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+                    return (result.toString());
+
+                } else {
+                    return ("unsuccessful");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("LOG",e.getMessage());
+                return "exception";
+            } finally {
+                conn.disconnect();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            pDialog.dismiss();
+            Log.e("RESPUESTAAAA TRABAJDOR", result);
+            JSONObject objetoJson;
+
+            try {
+                objetoJson = new JSONObject(result);
+                String respuesta = objetoJson.getString("status");
+                if (respuesta.equals("1")) {
+                    if (cursorMarcacion != null && cursorMarcacion.getCount() > 0) {
+                        cursorMarcacion.moveToFirst();
+                        while (!cursorMarcacion.isAfterLast()) {
+                            int id = cursorMarcacion.getInt(cursorMarcacion.getColumnIndex("_id"));
+                            dbManager.cctualizarMarcacion(id);
+                            cursorMarcacion.moveToNext();
+                        }
+
+                        Date c = Calendar.getInstance().getTime();
+                        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                        String fechaActual = df.format(c);
+
+                        Date dt = new Date();
+                        int hours = dt.getHours();
+                        int minutes = dt.getMinutes();
+                        int seconds = dt.getSeconds();
+                        String horaActual = hours + ":" + minutes + ":" + seconds;
+
+                        ContentValues cv = new ContentValues();
+                        cv.put("Fecha", fechaActual);
+                        cv.put("Hora", horaActual);
+                        dbManager.insertRegistroSincronizacion(cv);
+
+                        new SweetAlertDialog(contextRef.get(), SweetAlertDialog.SUCCESS_TYPE).setTitleText("Excelente!").setContentText("Datos sincronizados").show();
+                    }
+                } else {
+                    new SweetAlertDialog(contextRef.get(), SweetAlertDialog.ERROR_TYPE).setTitleText("Opss!").setContentText("Ocurrio un problema al sincronizar las marcaciones").show();
+                    Vibrator v = (Vibrator) contextRef.get().getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(600);
+                }
+            } catch (JSONException e) {
+                new SweetAlertDialog(contextRef.get(), SweetAlertDialog.ERROR_TYPE).setTitleText("Opss!").setContentText("Error al parsear respuesta").show();
+                Vibrator v = (Vibrator) contextRef.get().getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(600);
+                e.printStackTrace();
+            }
+        }
+    }
 }
